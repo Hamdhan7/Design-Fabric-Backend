@@ -5,15 +5,14 @@ const db = require('../config/database');
 
 
 // Get all products with image URLs
-router.get('/products', (req, res) => {
-    db.query('SELECT ProductID, Name, Description, Price, ImageURL FROM Product', (err, results) => {
-        if (err) {
-            console.error('Error executing query: ' + err.stack);
-            res.status(500).send('Internal Server Error');
-            return;
-        }
-        res.json(results);
-    });
+router.get('/products', async (req, res) => {
+  try {
+      const [results, fields] = await db.query('SELECT ProductID, Name, Description, Price, ImageURL FROM Product');
+      res.json(results);
+  } catch (err) {
+      console.error('Error executing query:', err);
+      res.status(500).send('Internal Server Error');
+  }
 });
 
 // Place orders (Authentication and authorization required for this )
