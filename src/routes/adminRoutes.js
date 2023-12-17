@@ -78,7 +78,7 @@ router.delete('/products/:productId', (req, res) => {
     const productId = req.params.productId;
 
     // Delete associated order items first
-    db.query('DELETE FROM OrderItem WHERE ProductID = ?', [productId], (err) => {
+    db.query('DELETE FROM ProductOrder WHERE ProductID = ?', [productId], (err) => {
         if (err) {
             console.error('Error deleting order items:', err);
             return res.status(500).json({ message: 'Internal Server Error' });
