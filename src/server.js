@@ -7,6 +7,7 @@ const session = require('express-session');
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const path = require('path');
+require('dotenv').config();
 
 const db = require('./config/database'); // Import the database connection module
 

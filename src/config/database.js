@@ -3,11 +3,16 @@
 
 const mysql = require('mysql2');
 
+// console.log('DB_HOST:', process.env.DB_HOST);
+// console.log('DB_USERNAME:', process.env.DB_USERNAME);
+// console.log('DB_PASSWORD:', process.env.DB_PASSWORD);
+// console.log('DB_DBNAME:', process.env.DB_DBNAME);
+
 const connection = mysql.createConnection({
-    host: 'sql.freedb.tech',
-    user: 'freedb_hamdhan',        // Your MySQL username
-    password: '$4$yY%CcKSA8jN#', // Your MySQL password
-    database: 'freedb_DesignFabric', // Your database name
+    host: process.env.DB_HOST,
+    user: process.env.DB_USERNAME,        // Your MySQL username
+    password: process.env.DB_PASSWORD, // Your MySQL password
+    database: process.env.DB_DBNAME, // Your database name
 });
 
 // const connection = mysql.createConnection({
