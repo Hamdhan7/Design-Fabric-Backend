@@ -30,7 +30,7 @@ app.use(passport.session());
 passport.use(new GoogleStrategy({
   clientID: '1089276245997-e49tiqts7v9qeeruno6rkce0gu5n4231.apps.googleusercontent.com',
   clientSecret: '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',
-  callbackURL: 'http://localhost:3000/auth/google/callback'
+  callbackURL: 'http://project-design-fabric-f30ca63e31e3.herokuapp.com/auth/google/callback'
 },
 (accessToken, refreshToken, profile, done) => {
   // Check if the user exists in your database
