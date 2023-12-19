@@ -7,7 +7,7 @@ const db = require('../config/database');
 // Get all products with image URLs
 router.get('/products', async (req, res) => {
   try {
-      const [results, fields] = await db.promisePool.execute('SELECT ProductID, Name, Description, Price, ImageURL FROM Product');
+      const [results, fields] = await promisePool.execute('SELECT ProductID, Name, Description, Price, ImageURL FROM Product');
       res.json(results);
   } catch (err) {
       console.error('Error executing query:', err);
@@ -97,7 +97,7 @@ router.post('/orders', (req, res) => {
       VALUES (?, ?, ?, ?, ?)
     `;
   
-    db.promisePool.execute(insertQuery, [ProductId, CustomerName, CustomerEmail, CustomerPhoneNumber, CustomerAddress], (err, results) => {
+    promisePool.execute(insertQuery, [ProductId, CustomerName, CustomerEmail, CustomerPhoneNumber, CustomerAddress], (err, results) => {
       if (err) {
         console.error('Error creating order: ', err);
         res.status(500).send('Error creating order');
