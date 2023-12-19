@@ -1,7 +1,7 @@
 // src/routes/adminRoutes.js
 const express = require('express');
 const router = express.Router();
-const db = require('../config/database');
+const promisePool = require('../config/database');
 const multer = require('multer');
 const path = require('path');
 

@@ -1,7 +1,7 @@
 // src/routes/userRoutes.js
 const express = require('express');
 const router = express.Router();
-const db = require('../config/database');
+const promisePool = require('../config/database');
 
 
 // Get all products with image URLs
