@@ -36,97 +36,58 @@ const upload = multer({
 });
 
 // Admin-related routes
-router.post('/products', upload.single('image'), (req, res) => {
+router.post('/products', upload.single('image'), async (req, res) => {
     const { name, description, price } = req.body;
-    const imageUrl = req.file ? `http://project-design-fabric-f30ca63e31e3.herokuapp.com/images/${req.file.filename}` : null; // Save the image URL
+    const imageUrl = req.file ? `http://project-design-fabric-f30ca63e31e3.herokuapp.com/images/${req.file.filename}` : null;
 
-    // Assuming you have validation for name, description, price, and imageUrl
-
-    promisePool.execute('INSERT INTO Product (Name, Description, Price, ImageUrl) VALUES (?, ?, ?, ?)', [name, description, price, imageUrl], (err, results) => {
-        if (err) {
-            console.error('Error executing MySQL query:', err);
-            res.status(500).send('Internal Server Error');
-        } else {
-            res.status(201).json({ message: 'Product added successfully', productId: results.insertId });
-        }
-    });
+    try {
+        const [results] = await promisePool.execute('INSERT INTO Product (Name, Description, Price, ImageUrl) VALUES (?, ?, ?, ?)', [name, description, price, imageUrl]);
+        res.status(201).json({ message: 'Product added successfully', productId: results.insertId });
+    } catch (err) {
+        console.error('Error executing MySQL query:', err);
+        res.status(500).send('Internal Server Error');
+    }
 });
 
-router.put('/products/:productId', upload.single('image'), (req, res) => {
+router.put('/products/:productId', upload.single('image'), async (req, res) => {
     const productId = req.params.productId;
     const { name, description, price } = req.body;
-    const imageUrl = req.file ? `/images/${req.file.filename}` : null; // Save the new image URL
+    const imageUrl = req.file ? `/images/${req.file.filename}` : null;
 
-    // Assuming you have validation for name, description, price, and imageUrl
-
-    promisePool.execute('UPDATE Product SET Name = ?, Description = ?, Price = ?, ImageUrl = ? WHERE ProductID = ?', [name, description, price, imageUrl, productId], (err, results) => {
-        if (err) {
-            console.error('Error executing MySQL query:', err);
-            res.status(500).send('Internal Server Error');
+    try {
+        const [results] = await promisePool.execute('UPDATE Product SET Name = ?, Description = ?, Price = ?, ImageUrl = ? WHERE ProductID = ?', [name, description, price, imageUrl, productId]);
+        if (results.affectedRows === 0) {
+            res.status(404).json({ message: 'Product not found' });
         } else {
-            if (results.affectedRows === 0) {
-                res.status(404).json({ message: 'Product not found' });
-            } else {
-                res.json({ message: 'Product updated successfully' });
-            }
+            res.json({ message: 'Product updated successfully' });
         }
-    });
+    } catch (err) {
+        console.error('Error executing MySQL query:', err);
+        res.status(500).send('Internal Server Error');
+    }
 });
 
-
-router.delete('/products/:productId', (req, res) => {
+router.delete('/products/:productId', async (req, res) => {
     const productId = req.params.productId;
 
-    // Delete associated order items first
-    promisePool.execute('DELETE FROM ProductOrder WHERE ProductID = ?', [productId], (err) => {
-        if (err) {
-            console.error('Error deleting order items:', err);
-            return res.status(500).json({ message: 'Internal Server Error' });
-        }
+    try {
+        // Delete associated order items first
+        await promisePool.execute('DELETE FROM ProductOrder WHERE ProductID = ?', [productId]);
 
         // Delete associated product
-        promisePool.execute('DELETE FROM Product WHERE ProductID = ?', [productId], (err, results) => {
-            if (err) {
-                console.error('Error executing MySQL query:', err);
-                res.status(500).send('Internal Server Error');
-            } else {
-                if (results.affectedRows === 0) {
-                    res.status(404).json({ message: 'Product not found' });
-                } else {
-                    res.json({ message: 'Product deleted successfully' });
-                }
-            }
-        });
-    });
+        const [results] = await promisePool.execute('DELETE FROM Product WHERE ProductID = ?', [productId]);
+        if (results.affectedRows === 0) {
+            res.status(404).json({ message: 'Product not found' });
+        } else {
+            res.json({ message: 'Product deleted successfully' });
+        }
+    } catch (err) {
+        console.error('Error executing MySQL query:', err);
+        res.status(500).send('Internal Server Error');
+    }
 });
 
-// Admin-only routes(Authorization and authentication required)
-// router.get('/orders', (req, res) => {
-//     db.query('SELECT * FROM `Order`', (err, results) => {
-//         if (err) {
-//             console.error('Error executing MySQL query:', err);
-//             res.status(500).send('Internal Server Error');
-//         } else {
-//             res.json(results);
-//         }
-//     });
-// });
-
-// get All orders(Authorization and authentication required)
-// router.get('/orders', (req, res) => {
-//     // Retrieve all orders from the database (admin only)
-//     db.query('SELECT * FROM `Order`', (err, results) => {
-//         if (err) {
-//             console.error('Error executing MySQL query:', err);
-//             res.status(500).send('Internal Server Error');
-//         } else {
-//             res.json(results);
-//         }
-//     });
-// });
-
-// GET endpoint to retrieve orders with product information
-router.get('/orders', (req, res) => {
+router.get('/orders', async (req, res) => {
     const selectQuery = `
       SELECT po.OrderId, po.ProductId, po.CustomerName, po.CustomerEmail, po.CustomerPhoneNumber, po.CustomerAddress,
              p.Name as ProductName
@@ -134,14 +95,8 @@ router.get('/orders', (req, res) => {
       LEFT JOIN product p ON po.ProductId = p.ProductID
     `;
 
-    promisePool.execute(selectQuery, (err, results) => {
-        if (err) {
-            console.error('Error retrieving orders: ', err);
-            res.status(500).send('Error retrieving orders');
-            return;
-        }
-
-        // Map the results to include only necessary fields
+    try {
+        const [results] = await promisePool.execute(selectQuery);
         const orders = results.map((result) => ({
             OrderId: result.OrderId,
             ProductId: result.ProductId,
@@ -151,30 +106,27 @@ router.get('/orders', (req, res) => {
             CustomerAddress: result.CustomerAddress,
             ProductName: result.ProductName,
         }));
-
         res.status(200).json(orders);
-    });
+    } catch (err) {
+        console.error('Error retrieving orders: ', err);
+        res.status(500).send('Error retrieving orders');
+    }
 });
 
-// Assuming you have a table named 'OrderItem' for storing order items
-router.delete('/orders/:orderId', (req, res) => {
+router.delete('/orders/:orderId', async (req, res) => {
     const orderId = req.params.orderId;
 
-    // Delete the order
-    promisePool.execute('DELETE FROM ProductOrder WHERE OrderId = ?', [orderId], (err, results) => {
-        if (err) {
-            console.error('Error executing MySQL query:', err);
-            res.status(500).send('Internal Server Error');
+    try {
+        const [results] = await promisePool.execute('DELETE FROM ProductOrder WHERE OrderId = ?', [orderId]);
+        if (results.affectedRows === 0) {
+            res.status(404).json({ message: 'Order not found' });
         } else {
-            if (results.affectedRows === 0) {
-                res.status(404).json({ message: 'Order not found' });
-            } else {
-                res.json({ message: 'Order deleted successfully' });
-            }
+            res.json({ message: 'Order deleted successfully' });
         }
-    });
-
+    } catch (err) {
+        console.error('Error executing MySQL query:', err);
+        res.status(500).send('Internal Server Error');
+    }
 });
-
 
 module.exports = router;
