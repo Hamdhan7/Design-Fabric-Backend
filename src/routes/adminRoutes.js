@@ -74,30 +74,25 @@ router.put('/products/:productId', upload.single('image'), (req, res) => {
 });
 
 
-router.delete('/products/:productId', (req, res) => {
+router.delete('/products/:productId', async (req, res) => {
     const productId = req.params.productId;
 
-    // Delete associated order items first
-    promisePool.execute('DELETE FROM ProductOrder WHERE ProductID = ?', [productId], (err) => {
-        if (err) {
-            console.error('Error deleting order items:', err);
-            return res.status(500).json({ message: 'Internal Server Error' });
-        }
+    try {
+        // Delete associated order items first
+        await promisePool.execute('DELETE FROM ProductOrder WHERE ProductID = ?', [productId]);
 
         // Delete associated product
-        promisePool.execute('DELETE FROM Product WHERE ProductID = ?', [productId], (err, results) => {
-            if (err) {
-                console.error('Error executing MySQL query:', err);
-                res.status(500).send('Internal Server Error');
-            } else {
-                if (results.affectedRows === 0) {
-                    res.status(404).json({ message: 'Product not found' });
-                } else {
-                    res.json({ message: 'Product deleted successfully' });
-                }
-            }
-        });
-    });
+        const result = await promisePool.execute('DELETE FROM Product WHERE ProductID = ?', [productId]);
+
+        if (result[0].affectedRows === 0) {
+            res.status(404).json({ message: 'Product not found' });
+        } else {
+            res.json({ message: 'Product deleted successfully' });
+        }
+    } catch (err) {
+        console.error('Error deleting product:', err);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
 });
 
 // Admin-only routes(Authorization and authentication required)
