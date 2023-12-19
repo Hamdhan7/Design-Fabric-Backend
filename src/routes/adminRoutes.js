@@ -126,20 +126,17 @@ router.delete('/products/:productId', (req, res) => {
 // });
 
 // GET endpoint to retrieve orders with product information
-router.get('/orders', (req, res) => {
-    const selectQuery = `
-      SELECT po.OrderId, po.ProductId, po.CustomerName, po.CustomerEmail, po.CustomerPhoneNumber, po.CustomerAddress,
-             p.Name as ProductName
-      FROM ProductOrder po
-      LEFT JOIN Product p ON po.ProductId = p.ProductID
-    `;
+// GET endpoint to retrieve orders with product information
+router.get('/orders', async (req, res) => {
+    try {
+        const selectQuery = `
+            SELECT po.OrderId, po.ProductId, po.CustomerName, po.CustomerEmail, po.CustomerPhoneNumber, po.CustomerAddress,
+                p.Name as ProductName
+            FROM ProductOrder po
+            LEFT JOIN Product p ON po.ProductId = p.ProductID
+        `;
 
-    promisePool.execute(selectQuery, (err, results) => {
-        if (err) {
-            console.error('Error retrieving orders: ', err);
-            res.status(500).send('Error retrieving orders');
-            return;
-        }
+        const [results] = await promisePool.execute(selectQuery);
 
         // Map the results to include only necessary fields
         const orders = results.map((result) => ({
@@ -153,8 +150,12 @@ router.get('/orders', (req, res) => {
         }));
 
         res.status(200).json(orders);
-    });
+    } catch (err) {
+        console.error('Error retrieving orders: ', err);
+        res.status(500).send('Error retrieving orders');
+    }
 });
+
 
 // Assuming you have a table named 'OrderItem' for storing order items
 router.delete('/orders/:orderId', (req, res) => {
