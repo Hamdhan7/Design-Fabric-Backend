@@ -11,9 +11,10 @@ const pool = mysql.createPool({
     waitForConnections: true,
     connectionLimit: 10, // Adjust according to your requirements
     queueLimit: 0,
+    Promise: require('bluebird'), // Ensure bluebird or another promise library is available
 
 });
 
-const db = pool.promise();
+const promisePool = pool.promise();
 
-module.exports = db;
+module.exports = promisePool;
