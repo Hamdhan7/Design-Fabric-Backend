@@ -134,7 +134,7 @@ router.get('/orders', (req, res) => {
       LEFT JOIN product p ON po.ProductId = p.ProductID
     `;
 
-    db.promise().execute(selectQuery, (err, results) => {
+    db.execute(selectQuery, (err, results) => {
         if (err) {
             console.error('Error retrieving orders: ', err);
             res.status(500).send('Error retrieving orders');

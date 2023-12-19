@@ -1,6 +1,6 @@
 
 
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise');
 
 const pool = mysql.createPool({
     host: process.env.DB_HOST,
@@ -11,10 +11,9 @@ const pool = mysql.createPool({
     waitForConnections: true,
     connectionLimit: 10, // Adjust according to your requirements
     queueLimit: 0,
-    Promise: require('bluebird'), // Ensure bluebird or another promise library is available
 
 });
 
-const promisePool = pool.promise();
+const db = pool.promise();
 
-module.exports = promisePool;
+module.exports = db;
