@@ -131,7 +131,7 @@ router.get('/orders', (req, res) => {
       SELECT po.OrderId, po.ProductId, po.CustomerName, po.CustomerEmail, po.CustomerPhoneNumber, po.CustomerAddress,
              p.Name as ProductName
       FROM ProductOrder po
-      LEFT JOIN product p ON po.ProductId = p.ProductID
+      LEFT JOIN Product p ON po.ProductId = p.ProductID
     `;
 
     promisePool.execute(selectQuery, (err, results) => {
