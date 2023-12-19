@@ -10,7 +10,7 @@ router.post('/register', async (req, res) => {
         const { name, password, address, phone } = req.body;
 
         // Insert user into the database
-        await db.query('INSERT INTO User (name, password, address, phoneNumber) VALUES (?, ?, ?, ?)', [name, password, address, phone]);
+        await db.execute('INSERT INTO User (name, password, address, phoneNumber) VALUES (?, ?, ?, ?)', [name, password, address, phone]);
 
         res.status(201).json({ message: 'User registered successfully' });
     } catch (error) {
@@ -35,7 +35,7 @@ router.post('/login', async (req, res) => {
 
         // Query to check if the user exists with the provided name and password
 
-        const result = await db.query('SELECT * FROM User WHERE Name = ? AND Password = ?', ['user9', 'testpassword']);
+        const result = await db.execute('SELECT * FROM User WHERE Name = ? AND Password = ?', ['user9', 'testpassword']);
         if (result instanceof Error) {
             console.error('Error during query:', result.message);
             res.status(500).json({ error: 'Internal Server Error' });

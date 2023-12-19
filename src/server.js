@@ -35,7 +35,7 @@ passport.use(new GoogleStrategy({
 (accessToken, refreshToken, profile, done) => {
   // Check if the user exists in your database
   const query = 'SELECT * FROM User WHERE GoogleID = ?';
-  db.query(query, [profile.id], (err, results) => {
+  db.execute(query, [profile.id], (err, results) => {
     if (err) {
       return done(err);
     }
@@ -46,13 +46,13 @@ passport.use(new GoogleStrategy({
     } else {
       // User doesn't exist, insert into the User table
       const insertQuery = 'INSERT INTO User (GoogleID, Name) VALUES (?, ?)';
-      db.query(insertQuery, [profile.id, profile.displayName], (err) => {
+      db.execute(insertQuery, [profile.id, profile.displayName], (err) => {
         if (err) {
           return done(err);
         }
 
         // Fetch the newly inserted user
-        db.query(query, [profile.id], (err, newUserResults) => {
+        db.execute(query, [profile.id], (err, newUserResults) => {
           if (err) {
             return done(err);
           }
@@ -72,7 +72,7 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser((id, done) => {
   const query = 'SELECT * FROM User WHERE UserID = ?';
-  db.query(query, [id], (err, results) => {
+  db.execute(query, [id], (err, results) => {
     if (err) {
       return done(err);
     }

@@ -42,7 +42,7 @@ router.post('/products', upload.single('image'), (req, res) => {
 
     // Assuming you have validation for name, description, price, and imageUrl
 
-    db.query('INSERT INTO Product (Name, Description, Price, ImageUrl) VALUES (?, ?, ?, ?)', [name, description, price, imageUrl], (err, results) => {
+    db.execute('INSERT INTO Product (Name, Description, Price, ImageUrl) VALUES (?, ?, ?, ?)', [name, description, price, imageUrl], (err, results) => {
         if (err) {
             console.error('Error executing MySQL query:', err);
             res.status(500).send('Internal Server Error');
@@ -59,7 +59,7 @@ router.put('/products/:productId', upload.single('image'), (req, res) => {
 
     // Assuming you have validation for name, description, price, and imageUrl
 
-    db.query('UPDATE Product SET Name = ?, Description = ?, Price = ?, ImageUrl = ? WHERE ProductID = ?', [name, description, price, imageUrl, productId], (err, results) => {
+    db.execute('UPDATE Product SET Name = ?, Description = ?, Price = ?, ImageUrl = ? WHERE ProductID = ?', [name, description, price, imageUrl, productId], (err, results) => {
         if (err) {
             console.error('Error executing MySQL query:', err);
             res.status(500).send('Internal Server Error');
@@ -78,14 +78,14 @@ router.delete('/products/:productId', (req, res) => {
     const productId = req.params.productId;
 
     // Delete associated order items first
-    db.query('DELETE FROM ProductOrder WHERE ProductID = ?', [productId], (err) => {
+    db.execute('DELETE FROM ProductOrder WHERE ProductID = ?', [productId], (err) => {
         if (err) {
             console.error('Error deleting order items:', err);
             return res.status(500).json({ message: 'Internal Server Error' });
         }
 
         // Delete associated product
-        db.query('DELETE FROM Product WHERE ProductID = ?', [productId], (err, results) => {
+        db.execute('DELETE FROM Product WHERE ProductID = ?', [productId], (err, results) => {
             if (err) {
                 console.error('Error executing MySQL query:', err);
                 res.status(500).send('Internal Server Error');
@@ -134,7 +134,7 @@ router.get('/orders', (req, res) => {
       LEFT JOIN product p ON po.ProductId = p.ProductID
     `;
 
-    db.query(selectQuery, (err, results) => {
+    db.execute(selectQuery, (err, results) => {
         if (err) {
             console.error('Error retrieving orders: ', err);
             res.status(500).send('Error retrieving orders');
@@ -161,7 +161,7 @@ router.delete('/orders/:orderId', (req, res) => {
     const orderId = req.params.orderId;
 
     // Delete the order
-    db.query('DELETE FROM ProductOrder WHERE OrderId = ?', [orderId], (err, results) => {
+    db.execute('DELETE FROM ProductOrder WHERE OrderId = ?', [orderId], (err, results) => {
         if (err) {
             console.error('Error executing MySQL query:', err);
             res.status(500).send('Internal Server Error');
