@@ -38,7 +38,7 @@ const upload = multer({
 // Admin-related routes
 router.post('/products', upload.single('image'), (req, res) => {
     const { name, description, price } = req.body;
-    const imageUrl = req.file ? `http://localhost:3000/images/${req.file.filename}` : null; // Save the image URL
+    const imageUrl = req.file ? `http://design-fabric-backend-dc5b3efbeec2.herokuapp.com/images/${req.file.filename}` : null; // Save the image URL
 
     // Assuming you have validation for name, description, price, and imageUrl
 
