@@ -90,7 +90,7 @@ app.get('/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/' }),
   (req, res) => {
     // Successful authentication, redirect to the dashboard or another page
-    res.redirect('http://localhost:3001/admin');
+    res.redirect('https://design-fabric-project-l9iocohvq-hamdhan7s-projects.vercel.app/admin');
   }
 );
 
